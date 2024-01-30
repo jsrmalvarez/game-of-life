@@ -29,7 +29,7 @@
 
 # GOL
 game_of_life
-.ycm_extra_conf.py*
+rust_game_of_life
 
 # buld folders
 **build/
