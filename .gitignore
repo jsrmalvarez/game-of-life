@@ -30,3 +30,10 @@
 # GOL
 game_of_life
 .ycm_extra_conf.py*
+
+# buld folders
+**build/
+**target/
+
+# VSCode
+.vscode
