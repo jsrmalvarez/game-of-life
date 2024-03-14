@@ -103,12 +103,43 @@ int main(int argc, char* argv[]) {
                 quit = true;
                 break;
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_q)
+                if (event.key.keysym.sym == SDLK_q) {
                     quit = true;
+                }
                 else if (event.key.keysym.sym == SDLK_SPACE) {
                     current_generation++;
                     log("Current generation {}", current_generation);
                     tick();
+                }
+                else if (event.key.keysym.sym == SDLK_r || event.key.keysym.sym == SDLK_0) {
+                    current_generation = 1;
+                    log("- Set pattern 0");
+                    log("Current generation {}", current_generation);
+                    reset(0);
+                }
+                else if (event.key.keysym.sym == SDLK_1) {
+                    current_generation = 1;
+                    log("- Set pattern 1");
+                    log("Current generation {}", current_generation);
+                    reset(1);
+                }
+                else if (event.key.keysym.sym == SDLK_2) {
+                    current_generation = 1;
+                    log("- Set pattern 2");
+                    log("Current generation {}", current_generation);
+                    reset(2);
+                }
+                else if (event.key.keysym.sym == SDLK_3) {
+                    current_generation = 1;
+                    log("- Set pattern 3");
+                    log("Current generation {}", current_generation);
+                    reset(3);
+                }
+                else if (event.key.keysym.sym == SDLK_4) {
+                    current_generation = 1;
+                    log("- Set pattern 4");
+                    log("Current generation {}", current_generation);
+                    reset(4);
                 }
                 drawing = true;
                 break;

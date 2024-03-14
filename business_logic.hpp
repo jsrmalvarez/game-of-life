@@ -3,8 +3,9 @@
 #include <stdbool.h>
 
 extern "C" {
-    
+
 void init(size_t width, size_t height);
+void reset(size_t pattern);
 void set_cell(int x, int y, bool alive);
 bool get_cell(int x, int y);
 void tick();

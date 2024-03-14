@@ -16,6 +16,11 @@ void init(size_t _width, size_t _height){
     next_generation= std::make_unique<bool[]>(width*height);
 }
 
+
+void reset(size_t pattern){
+    // TODO: not implemented
+}
+
 int mod(int a, int b) {
     int ret = a % b;
     if (ret < 0) {
@@ -71,7 +76,7 @@ size_t neighbors(int x, int y) {
 }
 
 
-void tick() {    
+void tick() {
     memcpy(next_generation.get(), current_generation.get(), width*height*sizeof(bool));
     for (int y=0; y<height; y++) {
         for (int x=0; x<width; x++) {

@@ -10,6 +10,15 @@ enum CellState {
     DeadCalculating(usize),
 }
 
+impl From<i32> for CellState{
+    fn from(value: i32) -> Self {
+        match value {
+            0 => CellState::Dead,
+            _ => CellState::Alive,
+        }
+    }
+}
+
 struct Board {
     cells: Vec<Vec<CellState>>,
     width: usize,
@@ -104,8 +113,6 @@ fn rust_tick() {
         }
     }
 
-    let mut number_live_cells = 0;
-
     // Apply Game of Life rules
     for x in 0..width {
         for y in 0..height {
@@ -118,12 +125,10 @@ fn rust_tick() {
                 CellState::AliveCalculating(_) =>
                     {
                         rust_set_cell(x, y, CellState::Alive);  // Lives on
-                        number_live_cells += 1;
                     },
                 CellState::DeadCalculating(num_alive_neighbohrs) if num_alive_neighbohrs == 3 =>
                     {
                         rust_set_cell(x, y, CellState::Alive); // Reproduction
-                        number_live_cells += 1;
                     },
                 CellState::DeadCalculating(_) =>
                         rust_set_cell(x, y, CellState::Dead), // Stays dead
@@ -137,10 +142,127 @@ fn rust_tick() {
 
 }
 
+fn rust_reset(pattern:size_t){
+    match pattern {
+        1 => {
+            set_pattern_1();
+        },
+        2 => {
+            set_pattern_2();
+        },
+        3 => {
+            set_pattern_3();
+        },
+        4 => {
+            set_pattern_4();
+        },
+        _ => set_pattern_all_dead()
+    }
+
+}
+
+fn set_pattern_1(){
+    let pattern =
+vec![
+vec![0, 1, 0],
+vec![0, 0, 1],
+vec![1, 1, 1],
+];
+    apply_pattern(&pattern);
+}
+
+fn set_pattern_2(){
+    let pattern =
+vec![
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    vec![0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1],
+    vec![1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    vec![1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    vec![0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+];
+    apply_pattern(&pattern);
+}
+
+fn set_pattern_3(){
+    let pattern =
+vec![
+vec![1, 0, 0, 0, 0, 0],
+vec![1, 0, 0, 0, 0, 0],
+vec![1, 1, 0, 0, 0, 0],
+vec![0, 0, 1, 0, 0, 0],
+vec![0, 0, 0, 0, 1, 1],
+vec![0, 0, 0, 0, 1, 0],
+];
+    apply_pattern(&pattern);
+}
+
+fn set_pattern_4(){
+    let pattern =
+vec![
+vec![0, 0, 1, 1, 0, 0],
+vec![1, 1, 0, 0, 1, 1],
+vec![1, 0, 0, 0, 0, 1],
+vec![1, 0, 0, 0, 0, 1],
+vec![1, 0, 0, 0, 0, 1],
+vec![1, 0, 0, 0, 0, 1],
+vec![1, 1, 1, 1, 1, 1],
+vec![1, 1, 1, 1, 1, 1],
+vec![1, 1, 1, 1, 1, 1],
+vec![1, 1, 1, 1, 1, 1],
+];
+    apply_pattern(&pattern);
+}
+
+fn set_pattern_all_dead(){
+    let width = Board::instance().width;
+    let height = Board::instance().height;
+    let pattern = vec![vec![0; width]; height];
+    apply_pattern(&pattern);
+}
+
+
+fn apply_pattern(integer_pattern: &Vec<Vec<i32>>){
+
+    let pattern: Vec<Vec<CellState>> = integer_pattern.iter()
+    .map(|sub_vec|
+        sub_vec.iter()
+            .map(|&num| CellState::from(num))
+            .collect()
+    )
+    .collect();
+    let width = Board::instance().width;
+    let height = Board::instance().height;
+    let pattern_width = pattern[0].len();
+    let pattern_height = pattern.len();
+    let p_x = (width - pattern_width)/2;
+    let p_y =(height - pattern_height)/2;
+
+    for x in 0..width {
+        for y in 0..height {
+            if x >= p_x && x < pattern[0].len() + p_x {
+                if y >= p_y && y < pattern.len() + p_y {
+                    rust_set_cell(x, y, pattern[y - p_y][x - p_x]);
+                }
+            }
+        }
+    }
+    print_number_of_live_cells();
+}
 
 #[no_mangle]
 pub extern "C" fn init(width:size_t, height:size_t){
     rust_init(width, height);
+}
+
+#[no_mangle]
+pub extern "C" fn reset(pattern:size_t){
+    rust_reset(pattern);
 }
 
 #[no_mangle]
