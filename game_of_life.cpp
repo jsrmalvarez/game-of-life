@@ -1,12 +1,14 @@
 #include <cstdint>
 #include <iostream>
+#include <string>
+#include <fmt/core.h>
 #include "business_logic.hpp"
 
 #include "SDL2/SDL.h"
 
 
-const int WIDTH = 30;
-const int HEIGHT = 30;
+const int WIDTH = 50;
+const int HEIGHT = 50;
 const int BOARD_SIZE = WIDTH * HEIGHT;
 const int SCALE = 20;
 const uint32_t OFF = 0x00000000;
@@ -14,7 +16,9 @@ const uint32_t ON  = 0xFFFF0000;
 
 uint32_t board[BOARD_SIZE];
 
-void log(const std::string& message) {
+template<typename ...Args>
+void log(const std::string& format, Args... args) {
+    std::string message = fmt::format(format, args...);
     std::cout << "[game_of_life] " << message << std::endl;
 }
 
@@ -59,7 +63,10 @@ int main(int argc, char* argv[]) {
     );
 
     log("creating board");
+    size_t current_generation = 1;
+    log("Current generation {}", current_generation);
     init(WIDTH, HEIGHT);
+
 
     bool quit = false;
     bool drawing = false;
@@ -71,6 +78,7 @@ int main(int argc, char* argv[]) {
     SDL_RenderPresent(renderer);
 
     SDL_Event event;
+
 
     while (!quit) {
         SDL_WaitEvent(&event);
@@ -98,7 +106,8 @@ int main(int argc, char* argv[]) {
                 if (event.key.keysym.sym == SDLK_q)
                     quit = true;
                 else if (event.key.keysym.sym == SDLK_SPACE) {
-                    log("computing next generation");
+                    current_generation++;
+                    log("Current generation {}", current_generation);
                     tick();
                 }
                 drawing = true;

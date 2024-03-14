@@ -37,3 +37,7 @@ rust_game_of_life
 
 # VSCode
 .vscode
+
+# vim
+*.swp
+*.swo

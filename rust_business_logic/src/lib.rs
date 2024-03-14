@@ -1,6 +1,5 @@
 extern crate cty;
-use core::num;
-use std::{ops::RangeInclusive, sync::{Mutex, MutexGuard, OnceLock}};
+use std::sync::{Mutex, MutexGuard, OnceLock};
 use cty::{c_int, size_t};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -22,7 +21,6 @@ static BOARD_STATE:OnceLock<Mutex<Board>> = OnceLock::new();
 impl Board {
 
     fn instance() -> MutexGuard<'static, Board>{
-        //BOARD.get().expect("Board not initialized").lock().unwrap()
         BOARD_STATE.get().expect("Cannot get board").lock().unwrap_or_else(|_| panic!("Cannot unlock board"))
     }
 
@@ -35,7 +33,27 @@ impl Board {
 }
 
 fn rust_init(width: usize, height: usize) {
-    Board::initialize(width, height);    
+    Board::initialize(width, height);
+    print_number_of_live_cells();
+
+}
+
+fn print_number_of_live_cells(){
+    let mut number_live_cells = 0;
+
+    let width = Board::instance().width;
+    let height = Board::instance().height;
+    for x in 0..width {
+        for y in 0..height {
+            let current_cell = rust_get_cell(x, y);
+            match current_cell {
+                CellState::Alive => number_live_cells +=1,
+                _ => (),
+            }
+        }
+    }
+
+    println!("Remaining live cells: {}", number_live_cells);
 }
 
 fn rust_get_cell(x: usize, y: usize) -> CellState {
@@ -86,41 +104,37 @@ fn rust_tick() {
         }
     }
 
+    let mut number_live_cells = 0;
+
     // Apply Game of Life rules
     for x in 0..width {
         for y in 0..height {
             let current_cell = rust_get_cell(x, y);
             match current_cell {
                 CellState::AliveCalculating(num_alive_neighbohrs) if num_alive_neighbohrs < 2 =>
-                    {
-                    println!("{} {} dies by Underpopulation {} n",x, y, num_alive_neighbohrs);
-                    rust_set_cell(x, y, CellState::Dead) // Underpopulation
-                    },
+                        rust_set_cell(x, y, CellState::Dead), // Underpopulation
                 CellState::AliveCalculating(num_alive_neighbohrs) if num_alive_neighbohrs > 3 =>
-                    {
-                    println!("{} {} dies by Overpopulation {} n",x, y, num_alive_neighbohrs);
-                    rust_set_cell(x, y, CellState::Dead) // Overpopulation
-                    },
+                        rust_set_cell(x, y, CellState::Dead), // Overpopulation
                 CellState::AliveCalculating(_) =>
                     {
-                    println!("{} {} lives on",x, y);
-                    rust_set_cell(x, y, CellState::Alive)
-                    }, // Lives on
+                        rust_set_cell(x, y, CellState::Alive);  // Lives on
+                        number_live_cells += 1;
+                    },
                 CellState::DeadCalculating(num_alive_neighbohrs) if num_alive_neighbohrs == 3 =>
                     {
-                    println!("{} {} is born {} n",x, y, num_alive_neighbohrs);
-                    rust_set_cell(x, y, CellState::Alive) // Reproduction
+                        rust_set_cell(x, y, CellState::Alive); // Reproduction
+                        number_live_cells += 1;
                     },
                 CellState::DeadCalculating(_) =>
-                    {
-                    println!("{} {} remains dead",x, y);
-                    rust_set_cell(x, y, CellState::Dead) // Stays dead
-                    },
+                        rust_set_cell(x, y, CellState::Dead), // Stays dead
                 _ => panic!("Cannot apply Game of Life rules to a cell that is not calculating"),
             }
-           
+
         }
     }
+
+    print_number_of_live_cells();
+
 }
 
 
@@ -149,10 +163,10 @@ pub extern "C" fn tick(){
 mod tests {
     use super::*;
 
-    #[test]    
+    #[test]
     #[should_panic(expected = "Board already initialized")]
     fn cannot_reinitialize() {
-        rust_init(10, 10);        
+        rust_init(10, 10);
         rust_init(10, 10);
     }
 
@@ -185,7 +199,7 @@ mod tests {
         rust_set_cell(0, 0, CellState::Alive);
         rust_set_cell(0, 1, CellState::Alive);
         rust_set_cell(1, 0, CellState::Alive);
-        
+
         assert_eq!(rust_get_alive_neighbohrs(0, 0), 2);
         rust_tick();
         assert_eq!(rust_get_cell(0, 0), CellState::Alive);
@@ -202,11 +216,11 @@ mod tests {
         rust_set_cell(0, 1, CellState::Alive);
         rust_set_cell(2, 1, CellState::Alive);
         rust_set_cell(1, 2, CellState::Alive);
-                
+
         assert_eq!(rust_get_alive_neighbohrs(1, 0), 2);
         assert_eq!(rust_get_alive_neighbohrs(0, 1), 2);
         assert_eq!(rust_get_alive_neighbohrs(2, 1), 2);
-        assert_eq!(rust_get_alive_neighbohrs(1, 2), 2);             
+        assert_eq!(rust_get_alive_neighbohrs(1, 2), 2);
         rust_tick();
 
         assert_eq!(rust_get_cell(1, 0), CellState::Alive);
